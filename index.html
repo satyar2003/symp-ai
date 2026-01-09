@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Health Chatbot</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    body {
+      display: flex;
+      flex-direction: row;
+    }
+    /* Sidebar */
+    #sidebar {
+      width: 200px;
+      border-right: 1px solid #ccc;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+    #sidebar h3 {
+      margin-top: 5;
+    }
+    #conversations {
+      list-style: none;
+      padding: 0;
+    }
+    #conversations li {
+      padding: 6px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    #conversations li:hover {
+      background: #eee;
+    }
+    #conversations .active {
+      background: #ddd;
+      font-weight: bold;
+    }
+    /* Chat area */
+    #main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+    #chat {
+      flex: 1;
+      border: 1px solid black;
+      padding: 10px;
+      overflow-y: auto;
+    }
+    #chat p {
+      margin: 6px 0;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+    }
+    .user { color: blue; }
+    .bot { color: green; }
+    .typing {
+      font-style: italic;
+      color: #666;
+    }
+    .input-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    input {
+      flex: 1;
+      padding: 6px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div id="sidebar">
+  <button onclick="newConversation()">+ New Chat</button>
+  <h3>Conversations</h3>
+  <ul id="conversations"></ul>
+</div>
+
+<!-- Main Chat -->
+<div id="main">
+  <h2>Health Assistant</h2>
+
+  <div id="chat">
+    <div id="typing" class="typing" hidden>AI is typing…</div>
+  </div>
+
+  <div class="input-row">
+    <input id="input" placeholder="Describe your symptom..." onkeydown="handleKey(event)" />
+    <button onclick="sendMessage()">Send</button>
+  </div>
+</div>
+
+<script>
+const API = "http://localhost:8000";
+
+let currentConversationId = null;
+
+const chat = document.getElementById("chat");
+const input = document.getElementById("input");
+const typing = document.getElementById("typing");
+const convoList = document.getElementById("conversations");
+
+/* ---------- Utility ---------- */
+
+function scrollToBottom() {
+  requestAnimationFrame(() => {
+    chat.scrollTop = chat.scrollHeight;
+  });
+}
+
+function addMessage(text, sender) {
+  const p = document.createElement("p");
+  p.className = sender;
+  p.innerHTML = `<b>${sender === "user" ? "You" : "AI"}:</b> ${text}`;
+  chat.insertBefore(p, typing);
+  scrollToBottom();
+}
+
+function showTyping() {
+  typing.hidden = false;
+  scrollToBottom();
+}
+
+function hideTyping() {
+  typing.hidden = true;
+}
+
+/* ---------- Conversations ---------- */
+
+async function loadConversations() {
+  const res = await fetch(`${API}/conversations`);
+  const conversations = await res.json();
+
+  convoList.innerHTML = "";
+
+  conversations.forEach(c => {
+    const li = document.createElement("li");
+    li.textContent = c.title || `Conversation ${c.id}`;
+    li.onclick = () => selectConversation(c.id, li);
+    convoList.appendChild(li);
+  });
+}
+
+async function newConversation() {
+  const res = await fetch(`${API}/conversation`, { method: "POST" });
+  const data = await res.json();
+
+  currentConversationId = data.conversation_id;
+  chat.innerHTML = `<div id="typing" class="typing" hidden>AI is typing…</div>`;
+  loadConversations();
+}
+
+async function selectConversation(id, element) {
+  currentConversationId = id;
+
+  document.querySelectorAll("#conversations li")
+    .forEach(li => li.classList.remove("active"));
+  element.classList.add("active");
+
+  chat.innerHTML = `<div id="typing" class="typing" hidden>AI is typing…</div>`;
+
+  const res = await fetch(`${API}/messages/${id}`);
+  const messages = await res.json();
+
+  messages.forEach(m => addMessage(m.content, m.sender));
+}
+
+/* ---------- Chat ---------- */
+
+function handleKey(e) {
+  if (e.key === "Enter") sendMessage();
+}
+
+async function sendMessage() {
+  if (!currentConversationId) {
+    alert("Create or select a conversation first");
+    return;
+  }
+
+  const message = input.value.trim();
+  if (!message) return;
+
+  addMessage(message, "user");
+  await loadConversations();
+  input.value = "";
+  showTyping();
+
+  try {
+    const res = await fetch(`${API}/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message,
+        conversation_id: currentConversationId
+      })
+    });
+
+    const data = await res.json();
+    addMessage(data.reply, "bot");
+  } catch {
+    addMessage("Error contacting server", "bot");
+  } finally {
+    hideTyping();
+  }
+}
+
+function clearChatMessages() {
+  [...chat.querySelectorAll("p")].forEach(p => p.remove());
+}
+
+async function newConversation() {
+  const res = await fetch(`${API}/conversation`, { method: "POST" });
+  const data = await res.json();
+
+  currentConversationId = data.conversation_id;
+  clearChatMessages();
+  loadConversations();
+}
+
+async function selectConversation(id, element) {
+  currentConversationId = id;
+
+  document.querySelectorAll("#conversations li")
+    .forEach(li => li.classList.remove("active"));
+  element.classList.add("active");
+
+  clearChatMessages();
+
+  const res = await fetch(`${API}/messages/${id}`);
+  const messages = await res.json();
+
+  messages.forEach(m => addMessage(m.content, m.sender));
+}
+
+/* ---------- Init ---------- */
+loadConversations();
+</script>
+
+</body>
+</html>
