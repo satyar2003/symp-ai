@@ -204,6 +204,7 @@ async function sendMessage() {
 
     const data = await res.json();
     addMessage(data.reply, "bot");
+    loadConversations();
   } catch {
     addMessage("Error contacting server", "bot");
   } finally {
