@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, Body
 from contextlib import asynccontextmanager
 from pydantic import BaseModel
@@ -7,9 +8,11 @@ from nltk.tokenize import word_tokenize
 from nltk import pos_tag, RegexpParser
 from fastapi.middleware.cors import CORSMiddleware
 from database import init_db, get_db
+from dotenv import load_dotenv
 
 # --- Setup ---
-client = OpenAI(api_key="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")
+load_dotenv()
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 DB_NAME = "chat.db"
 
 # --- NLTK ---
