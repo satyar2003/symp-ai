@@ -135,7 +135,7 @@ function hideTyping() {
 /* ---------- Conversations ---------- */
 
 async function loadConversations() {
-  const res = await fetch(`${API}/conversations`, { method: "POST" });
+  const res = await fetch(`${API}/conversations`);
   const conversations = await res.json();
 
   convoList.innerHTML = "";
