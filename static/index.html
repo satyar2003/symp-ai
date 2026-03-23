@@ -148,29 +148,29 @@ async function loadConversations() {
   });
 }
 
-async function newConversation() {
-  const res = await fetch(`${API}/conversation`, { method: "POST" });
-  const data = await res.json();
+// async function newConversation() {
+//   const res = await fetch(`${API}/conversation`, { method: "POST" });
+//   const data = await res.json();
 
-  currentConversationId = data.conversation_id;
-  chat.innerHTML = `<div id="typing" class="typing" hidden>AI is typing…</div>`;
-  loadConversations();
-}
+//   currentConversationId = data.conversation_id;
+//   chat.innerHTML = `<div id="typing" class="typing" hidden>AI is typing…</div>`;
+//   loadConversations();
+// }
 
-async function selectConversation(id, element) {
-  currentConversationId = id;
+// async function selectConversation(id, element) {
+//   currentConversationId = id;
 
-  document.querySelectorAll("#conversations li")
-    .forEach(li => li.classList.remove("active"));
-  element.classList.add("active");
+//   document.querySelectorAll("#conversations li")
+//     .forEach(li => li.classList.remove("active"));
+//   element.classList.add("active");
 
-  chat.innerHTML = `<div id="typing" class="typing" hidden>AI is typing…</div>`;
+//   chat.innerHTML = `<div id="typing" class="typing" hidden>AI is typing…</div>`;
 
-  const res = await fetch(`${API}/messages/${id}`);
-  const messages = await res.json();
+//   const res = await fetch(`${API}/messages/${id}`);
+//   const messages = await res.json();
 
-  messages.forEach(m => addMessage(m.content, m.sender));
-}
+//   messages.forEach(m => addMessage(m.content, m.sender));
+// }
 
 /* ---------- Chat ---------- */
 
@@ -213,7 +213,9 @@ async function sendMessage() {
 }
 
 function clearChatMessages() {
-  [...chat.querySelectorAll("p")].forEach(p => p.remove());
+  // [...chat.querySelectorAll("p")].forEach(p => p.remove());
+  chat.innerHTML = "";
+  chat.appendChild(typing);
 }
 
 async function newConversation() {
