@@ -1,4 +1,4 @@
-import database
+import backend.database as database
 
 conn = database.get_db()
 cursor = conn.cursor()

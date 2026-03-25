@@ -59,16 +59,16 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# app.mount("/static", StaticFiles(directory="static"), name="static")
 
 class ChatRequest(BaseModel):
     message: str
     conversation_id: int
 
-@app.get("/", response_class=HTMLResponse)
-def serve_home():
-    with open("static/index.html") as f:
-        return f.read()
+# @app.get("/", response_class=HTMLResponse)
+# def serve_home():
+#     with open("static/index.html") as f:
+#         return f.read()
 
 @app.post("/conversation")
 def create_conversation():
