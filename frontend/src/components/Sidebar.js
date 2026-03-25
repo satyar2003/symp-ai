@@ -6,12 +6,12 @@ export default function Sidebar({
 }) {
   return (
     <div style={{ width: 220, borderRight: "1px solid #ccc", padding: 10 }}>
-      <button onClick={onNew}>+ New Chat</button>
+      <button onClick={() => { console.log("CLICKED BUTTON"); onNew(); }}>+ New Chat</button>
 
       <h3>Conversations</h3>
 
       <ul style={{ listStyle: "none", padding: 0 }}>
-        {conversations.map(c => (
+        {Array.isArray(conversations) && conversations.map(c => (
           <li
             key={c.id}
             onClick={() => onSelect(c.id)}

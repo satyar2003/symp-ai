@@ -72,7 +72,6 @@ class ChatRequest(BaseModel):
 
 @app.post("/conversation")
 def create_conversation():
-    init_db()
     conn = get_db()
     cursor = conn.cursor()
 
