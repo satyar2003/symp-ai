@@ -7,7 +7,7 @@ import nltk
 from nltk.tokenize import word_tokenize
 from nltk import pos_tag, RegexpParser
 from fastapi.middleware.cors import CORSMiddleware
-from database import init_db, get_db
+from backend.database import init_db, get_db
 from dotenv import load_dotenv
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -23,7 +23,7 @@ nltk.download("punkt_tab")
 nltk.download("averaged_perceptron_tagger")
 nltk.download("averaged_perceptron_tagger_eng")
 
-with open('wordlist.txt') as f:
+with open(r'backend/wordlist.txt') as f:
     SYMPTOM_KEYWORDS = [line.rstrip() for line in f]
 
 grammar = r"""

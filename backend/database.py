@@ -3,7 +3,7 @@ import sqlite3
 DB_NAME = 'chat.db'
 
 def get_db():
-    conn = sqlite3.connect(r'{}'.format(DB_NAME))
+    conn = sqlite3.connect(r'backend/{}'.format(DB_NAME))
     conn.row_factory = sqlite3.Row
     return conn
 
